@@ -1,0 +1,4 @@
+requests          # 用於發送網頁請求
+beautifulsoup4    # 用於解析 HTML 標籤 
+pandas            # 用於資料清洗、補齊體重空值與匯出 CSV [cite: 25]
+lxml              # 加速 BeautifulSoup 解析速度的引擎
