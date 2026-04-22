@@ -16,7 +16,7 @@ def find_tenno_sho_id(year):
         race_id = f"{year}0504{day}11"
         url = f"https://db.netkeiba.com/race/{race_id}/"
         try:
-            res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=5)
+            res = requests.get(url, headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15"}, timeout=5)
             res.encoding = 'EUC-JP'
             soup = BeautifulSoup(res.content, "html.parser")
             
@@ -37,7 +37,7 @@ def scrape_race_result(race_id, year):
     """抓取單場賽事的所有名次與成績"""
     url = f"https://db.netkeiba.com/race/{race_id}/"
     try:
-        res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
+        res = requests.get(url, headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15"}, timeout=10)
         res.encoding = 'EUC-JP'
         soup = BeautifulSoup(res.content, "html.parser")
         
@@ -58,7 +58,8 @@ def scrape_race_result(race_id, year):
                     time_sec = int(m) * 60 + float(s)
                 except:
                     pass
-
+            #for i in range(len(cols)):
+            #    print("index: ",i,cols[i]) #for debugging
             records.append({
                 "年度": year,
                 "着順": cols[0].text.strip(),
@@ -71,12 +72,13 @@ def scrape_race_result(race_id, year):
                 "タイム": time_str,
                 "タイム(秒)": time_sec,
                 "着差": cols[8].text.strip(),
-                "通過": cols[10].text.strip(),
-                "上り3F": cols[11].text.strip(),
-                "単勝": cols[12].text.strip(),
-                "人気": cols[13].text.strip(),
-                "馬体重": cols[14].text.strip()
+                "通過": cols[14].text.strip(),
+                "上り3F": cols[15].text.strip(),
+                "単勝": cols[16].text.strip(),
+                "人気": cols[17].text.strip(),
+                "馬体重": cols[18].text.strip()
             })
+        #print(records)
         return records
     except Exception as e:
         print(f"抓取 {year} 年賽果時發生錯誤: {e}")
@@ -87,7 +89,7 @@ if __name__ == "__main__":
     
     all_years_data = []
     # 抓取 2015 到 2024 年 (剛好 10 年)
-    for target_year in range(2015, 2025):
+    for target_year in range(2005, 2026):
         r_id = find_tenno_sho_id(target_year)
         if r_id:
             # 找到 ID 後就進去抓成績
