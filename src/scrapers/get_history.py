@@ -49,29 +49,30 @@ def get_entry_list(race_id):
         print(f"名單抓取錯誤: {e}")
         return []
 
-# --- 3. [新增] 核心功能：抓取馬匹屬性與血統 (Feature Extension) ---
+
+# --- 3. [更新] 核心功能：抓取馬匹屬性與血統 ---
 def scrape_horse_profile(h_id):
-    """抓取馬匹個人主頁，提取性別、年齡與五代血統 [cite: 33, 34]"""
+    """抓取馬匹個人主頁，提取性別、年齡與五代血統"""
     url = f"https://db.netkeiba.com/horse/ped/{h_id}/"
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     try:
         time.sleep(random.uniform(1.2, 2.0))
         res = requests.get(url, headers=headers, timeout=10)
-        res.encoding = res.apparent_encoding
+        res.encoding = 'EUC-JP'
         soup = BeautifulSoup(res.content, "html.parser")
         
         profile = {"sex_age": "未知", "sire": "未知", "dam_sire": "未知"}
         
-        # 提取性別年齡 (位於 db_prof_table) [cite: 25]
-        prof_table = soup.find('table', class_='db_prof_table')
-        if prof_table:
-            for row in prof_table.find_all('tr'):
-                th = row.find('th')
-                if th and '性齢' in th.get_text():
-                    profile["sex_age"] = row.find('td').get_text(strip=True)
-                    break
+        # --- 提取性別年齡 (根據 horse_page.html 結構使用 p.txt_01) ---
+        txt01 = soup.find('p', class_='txt_01')
+        if txt01:
+            raw_info = txt01.get_text(strip=True)
+            # 使用正則表達式提取，如 "牝4歳"
+            match = re.search(r'([牡牝騸]\d+歳)', raw_info)
+            if match:
+                profile["sex_age"] = match.group(1)
         
-        # 提取父系與母父系 (血統文本分析) [cite: 32]
+        # 提取父系與母父系 (血統文本分析)
         blood_table = soup.find('table', class_='blood_table')
         if blood_table:
             tds = blood_table.find_all('td')
@@ -84,7 +85,6 @@ def scrape_horse_profile(h_id):
     except Exception as e:
         print(f"屬性抓取錯誤 (ID: {h_id}): {e}")
         return {"sex_age": "未知", "sire": "未知", "dam_sire": "未知"}
-
 # --- 4. 核心功能：抓取歷史戰績 (智慧掃描版) ---
 def scrape_horse_history(h_id, h_name):
     """抓取馬匹過去所有賽事紀錄 [cite: 21]"""

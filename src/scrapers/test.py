@@ -1,25 +1,26 @@
 import requests
-from bs4 import BeautifulSoup
 
-# 你要求的特定格式
-url = "https://db.netkeiba.com/race/202505040811/"
-headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15"}
+# 目標 URL (ウィルサヴァイブ)
+url = "https://db.netkeiba.com/horse/2022104748"
+
+# 關鍵：加入瀏覽器標頭，防止被伺服器阻擋
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+}
 
 try:
-    res = requests.get(url, headers=headers, timeout=5)
-    res.encoding = 'EUC-JP'
-    print(f"伺服器回應狀態碼: {res.status_code}") # 200 代表成功，403 代表被擋
-
-    # 把程式看到的內容存下來
-    with open("what_the_bot_sees.html", "w", encoding="utf-8") as f:
-        f.write(res.text)
+    response = requests.get(url, headers=headers)
     
-    print("已將網頁內容存至 what_the_bot_sees.html，請打開這個檔案看看裡面有沒有表格。")
-
-    soup = BeautifulSoup(res.content, "html.parser")
-    # 嘗試找看看任何表格
-    tables = soup.find_all('table')
-    print(f"網頁中總共發現了 {len(tables)} 個表格")
+    # netkeiba 採用 EUC-JP 編碼，必須正確設定否則會亂碼
+    response.encoding = 'EUC-JP'
+    
+    if response.status_code == 200:
+        # 將抓到的 HTML 存成檔案
+        with open("horse_page.html", "w", encoding="utf-8") as f:
+            f.write(response.text)
+        print("成功！HTML 結構已儲存為 horse_page.html")
+    else:
+        print(f"失敗，狀態碼：{response.status_code}")
 
 except Exception as e:
-    print(f"連線發生錯誤: {e}")
+    print(f"發生錯誤：{e}")
